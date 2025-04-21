@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Responsive Birthday</title>
+  <style>
+    body {
+      background: #efe9e4;
+      font-family: monospace;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .memories {
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .left {
+      position: relative;
+      width: 100%;
+      max-width: 350px;
+      height: auto;
+      flex-shrink: 0;
+    }
+
+    .left > * {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+    }
+
+    .left > .frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .right #message {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  white-space: pre-line; /* ✅ สำคัญมาก */
+}
+
+
+    .right #next {
+      font-size: 1rem;
+      background-color: #ff8a80;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    #music-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #ff8a80;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      z-index: 999;
+    }
+
+    @media (max-width: 768px) {
+      .memories {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .right {
+        padding: 20px 10px;
+      }
+
+      .right #message {
+        font-size: 1rem;
+      }
+
+      .right #next {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="memories">
+    <div class="left">
+      <div id="image"></div>
+      <img class="frame" src="https://media.giphy.com/media/6jCnmXRdZzKrZF1LQ2/giphy.gif" alt="frame">
+    </div>
+    <div class="right">
+      <div id="message"></div>
+      <div id="next">อ่านต่อ</div>
+    </div>
+  </div>
+
+  <!-- 🔊 เพลงและปุ่มเปิด/ปิดเสียง -->
+  <audio id="bg-music" src="https://raw.githubusercontent.com/warisasae/hbirthday-web/main/Sunkissed.mp3" loop></audio>
+
+  <div id="music-toggle">🔊 เปิดเสียง</div>
+
+  <script>
+    const memories = [
+      { message: 'Happy Birthday นะอ้วน ', image: 'image/4.jpg' },
+      { message: 'วันนี้เป็นวันพิเศษของเธอนะ 💖', image: 'image/6.jpg' },
+      { message: 'ขอบคุณที่อยู่ด้วยกันมาตลอด :)', image: 'image/2.jpg' },
+      { message: 'ขอให้มีความสุขมากๆ ทุกวันเลยน้าา', image: 'image/8.jpg' },
+      { message: 'ขอให้ปีนี้เธอเจอเเต่สิ่งดีๆ', image: 'image/9.jpg' },
+      { message: 'และขอให้เธอมีเค้าในทุกๆปี', image: 'image/3.jpg' },
+      { message: 'เธอเก่งที่สุดในใจเค้าเเล้วนะอ้วน\nเธอต้องมั่นใจในตัวเองเยอะๆนะ\nเค้าเชื่อว่าเธอทำได้ทุกอย่าง\nและจะมีเค้าอยู่ข้างๆเธอเสมอ\n', image: 'image/7.jpg' },
+      { message: 'เค้ารักเธอที่สุดในโลกเลยนะอ้วน ', image: 'image/1.jpg' },
+    ];
+
+    const imageEl = document.getElementById('image');
+    const messageEl = document.getElementById('message');
+    const nextEl = document.getElementById('next');
+    const music = document.getElementById('bg-music');
+    const musicToggle = document.getElementById('music-toggle');
+
+    let index = 0;
+    let isMusicPlaying = false;
+
+    const render = () => {
+  const { image, message } = memories[index];
+  imageEl.style.backgroundImage = `url(${image || 'https://placekitten.com/350/350'})`;
+  messageEl.textContent = message;
+
+  // เมื่อถึงหน้าสุดท้าย ให้ซ่อนปุ่มอ่านต่อ แต่ไม่หยุดเพลง
+  if (index === memories.length - 1) {
+    nextEl.style.display = 'none';
+    musicToggle.textContent = music.muted ? '🔇 ปิดเสียง' : '🔊 เปิดเสียง';
+  }
+};
+
+
+nextEl.addEventListener('click', () => {
+  if (!isMusicPlaying) {
+    music.play().then(() => {
+      isMusicPlaying = true;
+      musicToggle.textContent = '🔊 เปิดเสียง';
+    }).catch(err => {
+      console.error("ไม่สามารถเล่นเพลงได้:", err);
+    });
+  }
+
+  if (index < memories.length - 1) {
+    index++;
+    render();
+  }
+});
+
+
+    musicToggle.addEventListener('click', () => {
+      if (music.muted || !isMusicPlaying) {
+        music.muted = false;
+        music.play();
+        isMusicPlaying = true;
+        musicToggle.textContent = '🔊 เปิดเสียง';
+      } else {
+        music.muted = true;
+        musicToggle.textContent = '🔇 ปิดเสียง';
+      }
+    });
+
+    window.onload = render;
+  </script>
+</body>
+</html>
